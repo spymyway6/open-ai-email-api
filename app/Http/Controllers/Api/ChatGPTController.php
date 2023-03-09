@@ -9,40 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ChatGPTController extends Controller
 {
-    public function getResponseOld(Request $request)
-    {
-
-        $headers = [
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . config('app.chat_gpt_key'),
-        ];
-        
-        $client = new GuzzleClient([
-            'headers' => $headers,
-            'verify' => false
-        ]);
-        
-        $body = "{
-            'prompt' : '.$request->prompt.',
-            'max_tokens' : 150,
-            'n' : 1,
-            'stop' : '\n',
-        }";
-        
-        $r = $client->request('POST', 'https://api.openai.com/v1/engines/davinci-codex/completions', [
-            'prompt' => $request->input('prompt'),
-            'max_tokens' => 150,
-            'n' => 1,
-            'stop' => '\n',
-        ]);
-        // $response = $r->getBody()->getContents();
-        return response()->json([
-            'data' => array(
-                'response' => $r
-            )
-        ], Response::HTTP_OK);
-    }
-
     public function getResponse(Request $request){
         $curl = curl_init();
 
@@ -59,7 +25,12 @@ class ChatGPTController extends Controller
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS =>'{
                 "model": "gpt-3.5-turbo",
-                "messages": [{"role": "user", "content": "'.$request->prompt.'"}]
+                "messages": [
+                    {
+                        "role": "user", 
+                        "content": "Write me an email response to this \"'.$request->prompt.'\""
+                    }
+                ]
             }',
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json',
